@@ -8,3 +8,4 @@ packaging
 termcolor
 questionary
 PySide6
+pypdfium2
