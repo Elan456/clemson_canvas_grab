@@ -4,6 +4,9 @@ from canvasapi import Canvas
 from termcolor import colored
 from canvasapi.exceptions import ResourceDoesNotExist
 from canvas_grab.config import Config
+import os 
+import json
+from canvas_grab.file_conversions import convert_file_to_json
 
 
 class ClemsonCanvasGrab:
@@ -21,6 +24,7 @@ class ClemsonCanvasGrab:
         self.filtered_courses = self.config.course_filter.get_filter().filter_course(self.available_courses)
 
         self.id_course_map = {course.id: course for course in self.courses}
+        self.parsed_name = None
 
     def get_course_names(self):
         return [course.name for course in self.filtered_courses]
@@ -38,7 +42,9 @@ class ClemsonCanvasGrab:
         config = self.config
         course_name_parser = canvas_grab.course_parser.CourseParser()
         # take on-disk snapshot
-        parsed_name = course_name_parser.get_parsed_name(course)
+        self.parsed_name = course_name_parser.get_parsed_name(course)
+        parsed_name = self.parsed_name
+
         print(f'  Download to {colored(parsed_name, "cyan")}')
         on_disk_path = f'{config.download_folder}/{parsed_name}'
         print("On disk path: ", on_disk_path)
@@ -68,6 +74,37 @@ class ClemsonCanvasGrab:
         transfer = canvas_grab.transfer.Transfer()
         transfer.transfer(
             on_disk_path, f'{config.download_folder}/_canvas_grab_archive', plans)
+        
+        self.create_jsons(course)
+        
+
+    def create_jsons(self, course):
+        # Go through all the files in the course and convert it to a json
+        for root, dirs, files in os.walk(f'{self.config.download_folder}/{self.parsed_name}'):
+            for file in files:
+                file_path = os.path.join(root, file)
+                json_version = convert_file_to_json(file_path)
+
+                if not json_version:
+                    print(colored(f'Failed to convert {file_path} to json', 'warning'))
+
+                with open(file_path + '.json', 'w') as f:
+                    f.write(json_version)
+
+        # Getting all the pages 
+        pages = course.get_pages(include=['body'])
+        for page in pages:
+            j = {
+                "title": page.title,
+                "body": page.body
+            }
+
+            page_path = f'{self.config.download_folder}/{self.parsed_name}/pages'
+            if not os.path.exists(page_path):
+                os.makedirs(page_path)
+            
+            with open(f'{page_path}/{page.title}.json', 'w') as f:
+                f.write(json.dumps(j, indent=4))
 
     # for idx, course in enumerate(filtered_courses):
     #     course_name = course.name
