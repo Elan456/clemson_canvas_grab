@@ -9,3 +9,4 @@ termcolor
 questionary
 PySide6
 pypdfium2
+python-docx

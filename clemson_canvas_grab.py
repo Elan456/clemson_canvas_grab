@@ -82,13 +82,18 @@ class ClemsonCanvasGrab:
         # Go through all the files in the course and convert it to a json
         for root, dirs, files in os.walk(f'{self.config.download_folder}/{self.parsed_name}'):
             for file in files:
+                if file.split(".")[-1] == "json":
+                    continue
+
                 file_path = os.path.join(root, file)
                 json_version = convert_file_to_json(file_path)
 
                 if not json_version:
-                    print(colored(f'Failed to convert {file_path} to json', 'warning'))
-
-                with open(file_path + '.json', 'w') as f:
+                    print(colored(f'Failed to convert {file_path} to json', 'yellow'))
+                    continue
+                
+                file_path = file_path.split(".")[0] + ".json"
+                with open(file_path, 'w') as f:
                     f.write(json_version)
 
         # Getting all the pages 
