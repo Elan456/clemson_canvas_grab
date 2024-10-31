@@ -31,12 +31,15 @@ def corpus_generator(folder_path, output_path):
             if file.split(".")[-1] != "json":
                 continue
 
+            if file == "corpus.json":
+                continue
+
             file_path = os.path.join(root, file)
             with open(file_path, "r") as f:
                 data = json.load(f)
 
 
-            title = data["document_name"]
+            source_document_name = data["document_name"]
             content = data["content"]
 
             # Handling the PDF per page style
@@ -59,8 +62,12 @@ def corpus_generator(folder_path, output_path):
             for idx, chunk in enumerate(chunks):
                 chunk_id = len(corpus)
                 corpus[chunk_id] = {
-                    "title": f"{title} - {idx}",
-                    "text": chunk
+                    "title": f"{source_document_name} - {idx}",
+                    "text": chunk,
+                    "metadata": {
+                        "source_document_name": source_document_name,
+                        "sequence_number": idx
+                    }
                 }
     # Save the corpus
     corpus_path = os.path.join(output_path, "corpus.json")
