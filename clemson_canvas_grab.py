@@ -7,6 +7,7 @@ from canvas_grab.config import Config
 import os 
 import json
 from canvas_grab.file_conversions import convert_file_to_json
+from chunker import corpus_generator
 
 
 class ClemsonCanvasGrab:
@@ -16,7 +17,7 @@ class ClemsonCanvasGrab:
         self.config.endpoint.api_key = token 
         self.config.download_folder = download_folder
         self.config.file_filter.allowed_group = ['Document']
-        self.config.organize_mode.mode = 'module_link'
+        self.config.organize_mode.mode = 'module'
 
         self.canvas = self.config.endpoint.login()
         self.courses = list(self.canvas.get_courses())
@@ -76,6 +77,8 @@ class ClemsonCanvasGrab:
             on_disk_path, f'{config.download_folder}/_canvas_grab_archive', plans)
         
         self.create_jsons(course)
+
+        corpus_generator(f'{self.config.download_folder}/{self.parsed_name}', f'{self.config.download_folder}/{self.parsed_name}')
         
 
     def create_jsons(self, course):
@@ -100,8 +103,8 @@ class ClemsonCanvasGrab:
         pages = course.get_pages(include=['body'])
         for page in pages:
             j = {
-                "title": page.title,
-                "body": page.body
+                "document_name": page.title,
+                "content": page.body
             }
 
             page_path = f'{self.config.download_folder}/{self.parsed_name}/pages'
