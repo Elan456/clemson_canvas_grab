@@ -82,6 +82,10 @@ class ClemsonCanvasGrab:
         
 
     def create_jsons(self, course):
+        
+        # The markdown directory will be perfectly flat folder full of markdown files
+        md_base_path = f'{self.config.download_folder}/{self.parsed_name}/markdown'
+        os.makedirs(md_base_path, exist_ok=True)
         # Go through all the files in the course and convert it to a json
         for root, dirs, files in os.walk(f'{self.config.download_folder}/{self.parsed_name}'):
             for file in files:
@@ -94,9 +98,18 @@ class ClemsonCanvasGrab:
                 if not json_version:
                     print(colored(f'Failed to convert {file_path} to json', 'yellow'))
                     continue
+
                 
+                file_name = file.split("/")[-1]
+                md_path = os.path.join(md_base_path, f"{file_name.split('.')[0]}.md")
+
                 file_path = file_path.split(".")[0] + ".json"
+              
                 with open(file_path, 'w') as f:
+                    f.write(json_version)
+
+                with open(md_path, 'w') as f:
+                    print("Saving to markdown: ", md_path)
                     f.write(json_version)
 
         # Getting all the pages 
@@ -113,6 +126,13 @@ class ClemsonCanvasGrab:
             
             with open(f'{page_path}/{page.title}.json', 'w') as f:
                 f.write(json.dumps(j, indent=4))
+
+            # Save to markdown inside the markdown folder
+
+            md_page_path = os.path.join(md_base_path, f"{page.title}.md")
+            with open(md_page_path, 'w') as f:
+                f.write(page.body)
+            
 
     # for idx, course in enumerate(filtered_courses):
     #     course_name = course.name
