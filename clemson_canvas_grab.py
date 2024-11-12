@@ -1,6 +1,6 @@
 import argparse 
 import canvas_grab 
-from canvasapi import Canvas
+from canvasapi import Canvas, exceptions
 from termcolor import colored
 from canvasapi.exceptions import ResourceDoesNotExist
 from canvas_grab.config import Config
@@ -114,24 +114,27 @@ class ClemsonCanvasGrab:
 
         # Getting all the pages 
         pages = course.get_pages(include=['body'])
-        for page in pages:
-            j = {
-                "document_name": page.title,
-                "content": page.body
-            }
+        try:
+            for page in pages:
+                j = {
+                    "document_name": page.title,
+                    "content": page.body
+                }
 
-            page_path = f'{self.config.download_folder}/{self.parsed_name}/pages'
-            if not os.path.exists(page_path):
-                os.makedirs(page_path)
-            
-            with open(f'{page_path}/{page.title}.json', 'w') as f:
-                f.write(json.dumps(j, indent=4))
+                page_path = f'{self.config.download_folder}/{self.parsed_name}/pages'
+                if not os.path.exists(page_path):
+                    os.makedirs(page_path)
+                
+                with open(f'{page_path}/{page.title}.json', 'w') as f:
+                    f.write(json.dumps(j, indent=4))
 
-            # Save to markdown inside the markdown folder
+                # Save to markdown inside the markdown folder
 
-            md_page_path = os.path.join(md_base_path, f"{page.title}.md")
-            with open(md_page_path, 'w') as f:
-                f.write(page.body)
+                md_page_path = os.path.join(md_base_path, f"{page.title}.md")
+                with open(md_page_path, 'w') as f:
+                    f.write(page.body)
+        except exceptions.ResourceDoesNotExist:
+            print("Failed to get pages for course")
             
 
     # for idx, course in enumerate(filtered_courses):
