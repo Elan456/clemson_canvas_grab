@@ -1,13 +1,13 @@
 import argparse 
-import canvas_grab 
+from . import canvas_grab
 from canvasapi import Canvas, exceptions
 from termcolor import colored
 from canvasapi.exceptions import ResourceDoesNotExist
-from canvas_grab.config import Config
+from .canvas_grab.config import Config
 import os 
 import json
-from canvas_grab.file_conversions import convert_file_to_json
-from chunker import corpus_generator
+from .canvas_grab.file_conversions import convert_file_to_json
+from .chunker import corpus_generator
 
 
 class ClemsonCanvasGrab:

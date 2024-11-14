@@ -7,6 +7,5 @@ from . import version
 from . import course_parser
 from . import get_options
 from . import file_conversions
-from . import __main__
 
 __version__ = version.VERSION
