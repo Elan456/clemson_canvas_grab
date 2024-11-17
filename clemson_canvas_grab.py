@@ -1,10 +1,10 @@
-import argparse 
+import argparse
 from . import canvas_grab
 from canvasapi import Canvas, exceptions
 from termcolor import colored
 from canvasapi.exceptions import ResourceDoesNotExist
 from .canvas_grab.config import Config
-import os 
+import os
 import json
 from .canvas_grab.file_conversions import convert_file_to_json
 from .chunker import corpus_generator
@@ -14,7 +14,7 @@ class ClemsonCanvasGrab:
     def __init__(self, token, download_folder='files'):
         self.config = Config()
         self.config.endpoint.endpoint = "https://clemson.instructure.com/"
-        self.config.endpoint.api_key = token 
+        self.config.endpoint.api_key = token
         self.config.download_folder = download_folder
         self.config.file_filter.allowed_group = ['Document']
         self.config.organize_mode.mode = 'module'
@@ -27,11 +27,15 @@ class ClemsonCanvasGrab:
         self.id_course_map = {course.id: course for course in self.courses}
         self.parsed_name = None
 
+
     def get_course_names(self):
         return [course.name for course in self.filtered_courses]
 
     def get_course_by_id(self, course_id):
         return self.id_course_map.get(course_id, None)
+
+    def get_course_name_ids(self):
+        return [(course.name, course.id) for course in self.filtered_courses]
 
     def update_local_course_info(self, course_id):
         course = self.get_course_by_id(course_id)
@@ -75,14 +79,14 @@ class ClemsonCanvasGrab:
         transfer = canvas_grab.transfer.Transfer()
         transfer.transfer(
             on_disk_path, f'{config.download_folder}/_canvas_grab_archive', plans)
-        
+
         self.create_jsons(course)
 
         corpus_generator(f'{self.config.download_folder}/{self.parsed_name}', f'{self.config.download_folder}/{self.parsed_name}')
-        
+
 
     def create_jsons(self, course):
-        
+
         # The markdown directory will be perfectly flat folder full of markdown files
         md_base_path = f'{self.config.download_folder}/{self.parsed_name}/markdown'
         os.makedirs(md_base_path, exist_ok=True)
@@ -99,12 +103,12 @@ class ClemsonCanvasGrab:
                     print(colored(f'Failed to convert {file_path} to json', 'yellow'))
                     continue
 
-                
+
                 file_name = file.split("/")[-1]
                 md_path = os.path.join(md_base_path, f"{file_name.split('.')[0]}.md")
 
                 file_path = file_path.split(".")[0] + ".json"
-              
+
                 with open(file_path, 'w') as f:
                     f.write(json_version)
 
@@ -112,7 +116,7 @@ class ClemsonCanvasGrab:
                     print("Saving to markdown: ", md_path)
                     f.write(json_version)
 
-        # Getting all the pages 
+        # Getting all the pages
         pages = course.get_pages(include=['body'])
         try:
             for page in pages:
@@ -124,7 +128,7 @@ class ClemsonCanvasGrab:
                 page_path = f'{self.config.download_folder}/{self.parsed_name}/pages'
                 if not os.path.exists(page_path):
                     os.makedirs(page_path)
-                
+
                 with open(f'{page_path}/{page.title}.json', 'w') as f:
                     f.write(json.dumps(j, indent=4))
 
@@ -135,7 +139,7 @@ class ClemsonCanvasGrab:
                     f.write(page.body)
         except exceptions.ResourceDoesNotExist:
             print("Failed to get pages for course")
-            
+
 
     # for idx, course in enumerate(filtered_courses):
     #     course_name = course.name
@@ -145,12 +149,12 @@ def main(args):
 
     if args.list_courses:
         print(g.get_course_names())
-        return 
-    
+        return
+
     if args.course_id is not None:
         g.update_local_course_info(args.course_id)
 
-    
+
 
 
 if __name__ == '__main__':
