@@ -8,6 +8,8 @@ import os
 import json
 from .canvas_grab.file_conversions import convert_file_to_json
 from .chunker import corpus_generator
+from .canvas_grab.utils import normalize_path, file_regex
+import re 
 
 
 class ClemsonCanvasGrab:
@@ -120,6 +122,10 @@ class ClemsonCanvasGrab:
         pages = course.get_pages(include=['body'])
         try:
             for page in pages:
+                # Normalize the page title
+                page.title = normalize_path(page.title, file_regex)
+
+
                 j = {
                     "document_name": page.title,
                     "content": page.body

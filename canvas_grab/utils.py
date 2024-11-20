@@ -35,8 +35,8 @@ def filter_available_courses(courses):
     return available_courses, not_available_courses
 
 
-file_regex = r"[\t\\\/:\*\?\"<>\|]"
-path_regex = r"[\t:*?\"<>|\/]"
+file_regex = r'[<>:"/\\|?*\x00-\x1f]'
+path_regex = r'[<>:"/\\|?*\x00-\x1f]'
 
 
 def is_windows():
