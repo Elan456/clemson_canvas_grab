@@ -12,10 +12,10 @@ import json
 import os 
 from langchain.text_splitter import RecursiveCharacterTextSplitter
 
-MAX_CHUNK_SIZE = 2000
+MAX_CHUNK_SIZE = 1000
 
 def chunk_with_langchain(text):
-    text_splitter = RecursiveCharacterTextSplitter(chunk_size=MAX_CHUNK_SIZE, chunk_overlap=200)
+    text_splitter = RecursiveCharacterTextSplitter(chunk_size=MAX_CHUNK_SIZE, chunk_overlap=100)
     chunks = text_splitter.split_text(text)
     return chunks
 
