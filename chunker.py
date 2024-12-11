@@ -25,23 +25,22 @@ def corpus_generator(folder_path, output_path):
     """
 
     corpus = {}
+    file_list = []
 
     for root, dirs, files in os.walk(folder_path):
-        for file in files:
-            if file.split(".")[-1] != "json":
+        for file_name in files:
+            if file_name.split(".")[-1] != "json":
                 continue
 
-            if file == "corpus.json":
+            if file_name == "corpus.json" or file_name == "file_list.json":
                 continue
 
-            print(f"Adding {file} to the corpus")
-
-            file_path = os.path.join(root, file)
+            file_path = os.path.join(root, file_name)
             with open(file_path, "r") as f:
                 data = json.load(f)
 
-
             source_document_name = data["document_name"]
+            file_list.append(source_document_name)
             content = data["content"]
 
             # Handling the PDF per page style
@@ -81,6 +80,12 @@ def corpus_generator(folder_path, output_path):
     with open(corpus_path, "w") as f:
         json.dump(corpus, f, indent=4)
         print(f"Saved corpus to {corpus_path}")
+    
+    # Write the file list
+    file_list_path = os.path.join(output_path, "file_list.json")
+    with open(file_list_path, "w") as f:
+        json.dump(file_list, f, indent=4)
+        print(f"Saved file list to {file_list_path}")
 
 
 
