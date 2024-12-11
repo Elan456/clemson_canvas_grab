@@ -10,6 +10,7 @@ from .canvas_grab.file_conversions import convert_file_to_json
 from .chunker import corpus_generator
 from .canvas_grab.utils import normalize_path, file_regex
 import re 
+import glob
 
 
 class ClemsonCanvasGrab:
@@ -95,7 +96,8 @@ class ClemsonCanvasGrab:
         # Go through all the files in the course and convert it to a json
         for root, dirs, files in os.walk(f'{self.config.download_folder}/{self.parsed_name}'):
             for file in files:
-                if file.split(".")[-1] == "json":
+                # Check if the file is a json file using glob
+                if file.endswith(".json"):
                     continue
 
                 file_path = os.path.join(root, file)
@@ -107,16 +109,19 @@ class ClemsonCanvasGrab:
 
 
                 file_name = file.split("/")[-1]
-                md_path = os.path.join(md_base_path, f"{file_name.split('.')[0]}.md")
+                # md_path = os.path.join(md_base_path, f"{file_name.split('.')[0]}.md")
+                file_path = os.path.splitext(file_name)[0] + ".json"
+                file_path = os.path.join(root, file_path)
 
-                file_path = file_path.split(".")[0] + ".json"
+
+                print("Saving to json: ", file_path)
 
                 with open(file_path, 'w') as f:
                     f.write(json_version)
 
-                with open(md_path, 'w') as f:
-                    print("Saving to markdown: ", md_path)
-                    f.write(json_version)
+                # with open(md_path, 'w') as f:
+                #     print("Saving to markdown: ", md_path)
+                #     f.write(json_version)
 
         # Getting all the pages
         pages = course.get_pages(include=['body'])

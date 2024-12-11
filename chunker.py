@@ -34,6 +34,8 @@ def corpus_generator(folder_path, output_path):
             if file == "corpus.json":
                 continue
 
+            print(f"Adding {file} to the corpus")
+
             file_path = os.path.join(root, file)
             with open(file_path, "r") as f:
                 data = json.load(f)
@@ -48,11 +50,14 @@ def corpus_generator(folder_path, output_path):
                 for section in content:
                     page_number = section.get("page_number", "")
                     paragraph_number = section.get("paragraph_number", "")
+                    slide_number = section.get("slide_number", "")
                     
                     if page_number:
-                        c += f"Page {page_number}\n"
+                        c += f"\n\nPage {page_number}\n"
                     if paragraph_number:
-                        c += f"Paragraph {paragraph_number}\n"
+                        c += f"\n\nParagraph {paragraph_number}\n"
+                    if slide_number:
+                        c += f"\n\nSlide {slide_number}\n"
 
                     c += section["text"]
                 content = c
